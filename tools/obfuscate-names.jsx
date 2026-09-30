@@ -1,8 +1,9 @@
+// Copyright (c) 2026 cpetersen4. See LICENSE for personal-use terms.
 // Run in Illustrator: File > Scripts > Other Script.
 // Uses the roster CSV only to identify names; no real names are embedded here.
 (function () {
     var root = new File($.fileName).parent.parent;
-    var target = new File(root.fsName + '/eyba-score-sheet-stickers-2026.ai');
+    var target = new File(root.fsName + '/templates/score-sheet-stickers-2026.ai');
     var roster = new File(root.fsName + '/teams/park15g-gravelle/team-names_park15g-gravelle.txt');
     if (!roster.exists) roster = File.openDialog('Select the original roster CSV or TXT');
     if (!roster) throw new Error('No roster selected. Nothing changed.');
@@ -77,10 +78,10 @@
             edits.push({start: 0, length: content.length, value: 'Sample Team'});
         if (edits.length) changes.push({frame: frame, edits: edits});
     }
-    var dryRun = typeof eybaDryRun !== 'undefined' && eybaDryRun;
+    var dryRun = typeof scoreSheetDryRun !== 'undefined' && scoreSheetDryRun;
     if (!dryRun && changes.length) {
         // Back up both the saved file and any unsaved state before changing text.
-        var backup = new File(Folder.temp.fsName + '/eyba-before-obfuscation-' + new Date().getTime() + '.ai');
+        var backup = new File(Folder.temp.fsName + '/score-sheet-before-obfuscation-' + new Date().getTime() + '.ai');
         if (!target.copy(backup.fsName)) throw new Error('Backup failed. Nothing changed.');
         if (!doc.saved) {
             var options = new IllustratorSaveOptions(); options.pdfCompatible = true;
@@ -99,7 +100,7 @@
         doc.save();
         app.redraw();
     }
-    var report = new File(Folder.temp.fsName + '/eyba-obfuscation-result.txt');
+    var report = new File(Folder.temp.fsName + '/score-sheet-obfuscation-result.txt');
     report.open('w');
     report.writeln((dryRun ? 'Dry run' : 'Saved') + ': ' + changes.length + ' text frames');
     for (var k = 0; k < replacements.length; k++) report.writeln(replacements[k].value);
