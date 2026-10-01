@@ -31,11 +31,11 @@ No Python or Illustrator installation is required. The EXE bundles its libraries
 
 ## Printing and use
 
-1. Open the sticker PDF in a PDF viewer.
-2. Select the home or away sticker page as needed.
-3. Print at **100% / actual size**, with automatic page scaling disabled so the roster layout keeps its intended dimensions.
-4. Check a plain-paper test print against the score sheet before printing on adhesive paper.
-5. Cut out the roster stickers and attach them to the appropriate team roster area on the score sheet.
+1. Use **full-sheet 8.5 × 11-inch adhesive label paper**, such as [this label paper](https://a.co/d/0fz6G47o) or Staples full-sheet shipping label paper. Choose paper suitable for your printer, with one label covering the whole sheet.
+2. Open the generated PDF and select the home or away page as needed.
+3. Select **Letter (8.5 × 11 inches)** paper and **Actual size / 100%** in the print dialog. Do **not** select Fit, Shrink, or Scale to fit. The PDF pages are landscape.
+4. Check a plain-paper test print against the score sheet, then print on the label paper.
+5. Use a **straight paper cutter or scissors** to cut out the individual stickers. Peel off the backing and attach each sticker to the team roster area on the score sheet.
 
 ## Updating the artwork
 

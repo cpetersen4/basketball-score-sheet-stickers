@@ -58,11 +58,16 @@ for line in ['Use up to 15 player rows. Leave unused rows completely blank.',
 c.showPage()
 page(3, '3. Save and print', 'Create a separate PDF with six home and six away roster stickers.')
 y = screenshot('../sample-output.png')
-for line in ['Browse for a new filename, then choose Create printable PDF.',
-             'With a CSV import, Browse starts in the CSV folder. Existing files are protected.',
-             'Open saved PDF launches your default PDF viewer. Print at 100% / actual size.',
-             'Test on plain paper against the score sheet before printing adhesive sheets.',
-             'Smaller rosters leave unused slots blank. Long names shrink to fit.']:
+for line in ['Open the generated PDF and select the home or away page.',
+             'Use full-sheet 8.5 x 11-inch adhesive label paper suitable for your printer.',
+             'Staples full-sheet shipping labels or similar full-sheet labels are suitable.',
+             'Example label paper: https://a.co/d/0fz6G47o',
+             'Select Letter paper and Actual size / 100%. Do not use Fit or Shrink.',
+             'The PDF pages are landscape. Check a plain-paper test before using labels.',
+             'Cut out the stickers with a straight paper cutter or scissors.',
+             'Peel off the backing and attach each sticker to the team roster area.']:
+    if line.startswith('Example label paper:'):
+        c.linkURL('https://a.co/d/0fz6G47o', (40, y-2, 350, y+12), relative=0)
     text(40, y, line, 10); y -= 20
 c.showPage()
 page(4, 'CSV format and troubleshooting', 'Store each team roster and its generated PDFs together.')
