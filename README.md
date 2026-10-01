@@ -16,7 +16,7 @@ No Python or Illustrator installation is required. The EXE bundles its libraries
 
 ### Review up to 15 players and coaching staff
 
-![Review team screen](docs/screenshots/review-team.jpg)
+![Review team screen](docs/screenshots/review-team.png)
 
 ### Print the home and away score sheet stickers
 

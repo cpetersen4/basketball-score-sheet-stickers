@@ -47,7 +47,7 @@ for line in ['Choose CSV / TXT to load your roster, or skip CSV to enter names m
     text(40, y, line, 10); y -= 20
 c.showPage()
 page(2, '2. Review your team', 'Enter the team name and check every player, number, and coach.')
-y = screenshot('review-team.jpg')
+y = screenshot('review-team.png')
 for line in ['Use up to 15 player rows. Leave unused rows completely blank.',
              'On smaller screens, scroll the form; tabbing brings fields into view.',
              'Jersey numbers must be unique and contain 1-3 digits (0-999).',
