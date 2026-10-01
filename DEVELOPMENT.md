@@ -49,6 +49,8 @@ python app/generate_pdf.py teams/sample/team-names_sample.csv output/sample-stic
 
 Use `--template` for a different PDF exported with the same placeholder structure. The original template and existing output files are never overwritten.
 
+For a Cricut Print Then Cut ZIP, use a `.zip` output filename and add `--cricut`. It contains one 600-DPI home sticker, one away sticker, a PDF guide, and exact image dimensions. The white interior stays opaque and the PNG canvas ends at the sticker boundary. There is no extra transparent margin to affect sizing on import. PDFium renders the filled PDF, including all 15 player slots and coaching rows, before cropping each individual sticker. Users set the supplied image width in Design Space and print through Design Space for sensor marks. Physical Cricut calibration and cutting pressure require a real machine test.
+
 The generator uses pypdf, pdfminer.six, and ReportLab. It removes template text, preserves graphics and page dimensions, and inserts the roster using Windows Arial. Names shrink to fit their cells; text that would become too small to read is rejected. Both imported and manually entered rosters receive validation.
 
 ## Build the Windows package

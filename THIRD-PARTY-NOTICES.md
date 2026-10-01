@@ -6,6 +6,10 @@ The Windows package includes CPython (PSF license), Tcl/Tk (BSD-style licenses),
 
 Upstream sources:
 
+Cricut image export also includes pypdfium2 (Apache-2.0 / BSD-3-Clause) and its PDFium renderer. The complete upstream license bundle, including PDFium's third-party notices, is included under `licenses/pypdfium2/`.
+
+- https://github.com/pypdfium2-team/pypdfium2
+
 - https://www.python.org/
 - https://www.tcl.tk/
 - https://github.com/py-pdf/pypdf
