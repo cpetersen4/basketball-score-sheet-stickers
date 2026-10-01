@@ -24,8 +24,10 @@ class StickerApp:
         self.window.title('Basketball Score Sheet Stickers')
         asset_root = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[1]))
         self.window.iconbitmap(str(asset_root / 'assets' / 'basketball.ico'))
-        self.window.geometry('1060x880')
-        self.window.minsize(1000, 860)
+        width = min(1060, max(840, self.window.winfo_screenwidth() - 80))
+        height = min(880, max(420, self.window.winfo_screenheight() - 100))
+        self.window.geometry(f'{width}x{height}')
+        self.window.minsize(840, 420)
         self.window.configure(bg=BG)
         self.window.option_add('*Font', ('Segoe UI', 10))
         style = ttk.Style(self.window)
@@ -45,11 +47,20 @@ class StickerApp:
         for variable in [self.head, self.assistants] + [v for row in self.players for v in row]:
             variable.trace_add('write', self.update_summary)
         self.summary_labels = None
+        self.window.bind('<MouseWheel>', self.scroll_body)
+        self.window.bind('<FocusIn>', self.reveal_field)
         self.show(1)
 
     def label(self, parent, text, size=10, color=INK, bold=False, **kwargs):
-        return tk.Label(parent, text=text, bg=parent['bg'], fg=color,
-                        font=('Segoe UI', size, 'bold' if bold else 'normal'), **kwargs)
+        label = tk.Label(parent, text=text, bg=parent['bg'], fg=color,
+                         font=('Segoe UI', size, 'bold' if bold else 'normal'), **kwargs)
+        if 'wraplength' in kwargs:
+            maximum = kwargs['wraplength']
+            def fit_text(event):
+                padding = 2 * parent.winfo_pixels(parent.cget('padx'))
+                label.configure(wraplength=max(120, min(maximum, event.width - padding - 2)))
+            parent.bind('<Configure>', fit_text, add='+')
+        return label
 
     def button(self, parent, text, command, primary=False):
         return tk.Button(parent, text=text, command=command, relief='flat', bd=0,
@@ -105,10 +116,19 @@ class StickerApp:
         self.label(main, headings[step-1], size=23, bold=True).pack(anchor='w')
         self.label(main, descriptions[step-1], color=MUTED, wraplength=730,
                    justify='left').pack(anchor='w', pady=(6, 20))
-        body = tk.Frame(main, bg=BG)
-        body.pack(fill='both', expand=True)
+        # Reserve navigation space before the scrolling content takes the rest.
         footer = tk.Frame(main, bg=BG)
-        footer.pack(fill='x', pady=(18, 0))
+        footer.pack(side='bottom', fill='x', pady=(18, 0))
+        viewport = tk.Frame(main, bg=BG)
+        viewport.pack(fill='both', expand=True)
+        self.body_canvas = tk.Canvas(viewport, bg=BG, highlightthickness=0, width=1, height=1)
+        self.body_canvas.pack(side='left', fill='both', expand=True)
+        self.body_scrollbar = ttk.Scrollbar(viewport, orient='vertical', command=self.body_canvas.yview)
+        self.body_canvas.configure(yscrollcommand=self.body_scrollbar.set)
+        self.body_frame = body = tk.Frame(self.body_canvas, bg=BG)
+        self.body_window = self.body_canvas.create_window((0, 0), window=body, anchor='nw')
+        self.body_canvas.bind('<Configure>', self.resize_body)
+        body.bind('<Configure>', self.resize_body)
         if step > 1:
             self.button(footer, 'Back', lambda: self.show(step-1)).pack(side='left')
         if step == 1:
@@ -118,6 +138,42 @@ class StickerApp:
             self.button(footer, 'Continue to save  >', self.continue_to_save, True).pack(side='right')
         else:
             self.save_screen(body)
+
+    def resize_body(self, event=None):
+        canvas = self.body_canvas
+        height = max(canvas.winfo_height(), self.body_frame.winfo_reqheight())
+        canvas.itemconfigure(self.body_window, width=canvas.winfo_width(), height=height)
+        canvas.configure(scrollregion=(0, 0, canvas.winfo_width(), height))
+        if height > canvas.winfo_height() + 1:
+            if not self.body_scrollbar.winfo_manager():
+                self.body_scrollbar.pack(side='right', fill='y')
+        else:
+            self.body_scrollbar.pack_forget()
+
+    def is_body_widget(self, widget):
+        while widget is not None:
+            if widget == self.body_canvas:
+                return True
+            widget = widget.master
+        return False
+
+    def scroll_body(self, event):
+        if self.is_body_widget(event.widget) and self.body_scrollbar.winfo_manager():
+            self.body_canvas.yview_scroll(-1 if event.delta > 0 else 1, 'units')
+            return 'break'
+
+    def reveal_field(self, event):
+        if not self.is_body_widget(event.widget):
+            return
+        canvas = self.body_canvas
+        top = event.widget.winfo_rooty() - self.body_frame.winfo_rooty()
+        bottom = top + event.widget.winfo_height()
+        visible_top = canvas.canvasy(0)
+        height = self.body_frame.winfo_height()
+        if top < visible_top:
+            canvas.yview_moveto(top / max(height, 1))
+        elif bottom > visible_top + canvas.winfo_height():
+            canvas.yview_moveto((bottom - canvas.winfo_height()) / max(height, 1))
 
     def load_screen(self, body):
         for title, caption, button, action, primary in [

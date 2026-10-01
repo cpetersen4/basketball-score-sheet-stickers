@@ -16,3 +16,7 @@ These checks describe this build and do not guarantee absence of all vulnerabili
 The GitHub Windows workflow repeats tests, medium/high Bandit checks, dependency auditing, and portable build verification for PRs and pushes to main. It does not replace the local Defender or Gitleaks checks.
 
 The AGPL PDF engine was replaced with permissive pypdf, pdfminer.six, and ReportLab to support the requested permission-based distribution terms. pypdf was updated to 6.19.0 before the final audit; all build dependencies are pinned. Generated pages were rendered and visually checked after the engine replacement.
+
+## Follow-up bug sweep (2026-09-30)
+
+The follow-up fixes duplicate CSV headers, invisible text sizing, malformed/repeated template rows, template text retained in nested PDF forms, incomplete output files after failed writes, and access to all rows on smaller screens. Seventeen regression/integration tests pass, including exclusive-file-creation race protection and scroll/keyboard navigation. The Windows package was rebuilt and verified independently of external Python. Dependency auditing remains clear; Bandit has no medium/high findings.

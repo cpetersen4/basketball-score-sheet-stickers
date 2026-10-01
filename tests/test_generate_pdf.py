@@ -4,9 +4,10 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
-from pypdf import PdfReader
-from pypdf.generic import ContentStream
+from pypdf import PdfReader, PdfWriter
+from pypdf.generic import ContentStream, DecodedStreamObject, DictionaryObject, NameObject
 from reportlab.pdfgen import canvas
 
 class Page:
@@ -134,6 +135,94 @@ class GeneratorTests(unittest.TestCase):
                     self.assertEqual(text.count('Example ' + chr(64 + i)), 6)
                     self.assertEqual([w[4] for w in page.get_text('words')].count(str(i)), 6)
                 self.assertNotIn('Player 15', text)
+
+    def test_duplicate_csv_headers_are_rejected(self):
+        path = self.root / 'duplicate-header.csv'
+        path.write_text('number,name,role,name\n1,Original,Player,Overwritten\n')
+        with self.assertRaises(ValueError):
+            generator.read_roster(path)
+
+    def test_invisible_names_and_team_names_are_rejected_without_output(self):
+        for name, team in [('\u200b', 'Team'), ('Player', '\u200d')]:
+            with self.subTest(name=name, team=team):
+                output = self.root / 'invisible.pdf'
+                roster = generator.manual_roster([('1', name)], '', [])
+                with self.assertRaisesRegex(ValueError, 'visible'):
+                    generator.generate_pdf(None, output, team, roster=roster)
+                self.assertFalse(output.exists())
+
+    def test_repeated_template_player_slot_is_rejected(self):
+        page = generator._template_pages(generator.DEFAULT_TEMPLATE)[0]
+        spans = generator._spans(page)
+        next(span for span in spans if span['text'] == 'Player 15')['text'] = 'Player 14'
+        roster = generator.manual_roster([('1', 'Example')], '', [])
+        with patch.object(generator, '_spans', return_value=spans):
+            with self.assertRaisesRegex(ValueError, 'once'):
+                generator._plan(page, roster, 'Team')
+
+    def test_serialization_failure_does_not_leave_an_output_file(self):
+        output = self.root / 'failed.pdf'
+        roster = generator.manual_roster([('1', 'Example')], '', [])
+        with patch.object(generator.PdfWriter, 'write', side_effect=RuntimeError('Failed writer')):
+            with self.assertRaises(RuntimeError):
+                generator.generate_pdf(None, output, 'Team', roster=roster)
+        self.assertFalse(output.exists())
+
+    def test_file_created_during_generation_is_not_removed_or_overwritten(self):
+        output = self.root / 'racing.pdf'
+        roster = generator.manual_roster([('1', 'Example')], '', [])
+        original_write = generator.PdfWriter.write
+        def racing_write(writer, buffer):
+            original_write(writer, buffer)
+            output.write_bytes(b'Created by another process')
+        with patch.object(generator.PdfWriter, 'write', racing_write):
+            with self.assertRaises(FileExistsError):
+                generator.generate_pdf(None, output, 'Team', roster=roster)
+        self.assertEqual(output.read_bytes(), b'Created by another process')
+
+    def test_failed_disk_write_removes_partial_file(self):
+        output = self.root / 'partial.pdf'
+        roster = generator.manual_roster([('1', 'Example')], '', [])
+        original_open = Path.open
+        class PartialWriter:
+            def __init__(self, stream): self.stream = stream
+            def __enter__(self): return self
+            def __exit__(self, *args): self.stream.close()
+            def write(self, data):
+                self.stream.write(data[:10])
+                raise OSError('Simulated full disk')
+        def open_file(path, mode='r', *args, **kwargs):
+            stream = original_open(path, mode, *args, **kwargs)
+            return PartialWriter(stream) if path == output and mode == 'xb' else stream
+        with patch.object(Path, 'open', open_file):
+            with self.assertRaises(OSError):
+                generator.generate_pdf(None, output, 'Team', roster=roster)
+        self.assertFalse(output.exists())
+
+    def test_template_text_inside_form_objects_is_removed(self):
+        writer = PdfWriter()
+        for source in PdfReader(generator.DEFAULT_TEMPLATE).pages:
+            page = writer.add_page(source)
+            form = DecodedStreamObject()
+            form.set_data(page.get_contents().get_data())
+            form.update({NameObject('/Type'): NameObject('/XObject'),
+                         NameObject('/Subtype'): NameObject('/Form'),
+                         NameObject('/BBox'): page.mediabox,
+                         NameObject('/Resources'): page['/Resources']})
+            stream = DecodedStreamObject()
+            stream.set_data(b'q /Sticker Do Q')
+            page[NameObject('/Contents')] = writer._add_object(stream)
+            page[NameObject('/Resources')] = DictionaryObject({
+                NameObject('/XObject'): DictionaryObject({NameObject('/Sticker'): writer._add_object(form)})})
+        template = self.root / 'form-template.pdf'
+        writer.write(template)
+        output = self.root / 'form-filled.pdf'
+        roster = generator.manual_roster([('77', 'Fresh Player')], '', [])
+        generator.generate_pdf(None, output, 'Fresh Team', template, roster=roster)
+        text = '\n'.join(page.extract_text() for page in PdfReader(output).pages)
+        self.assertEqual(text.count('Fresh Player'), 12)
+        self.assertNotIn('Player 01', text)
+        self.assertNotIn('Sample Team', text)
 
     def test_refuses_overwriting_template_or_existing_output(self):
         roster = self.roster([['1', 'Sample', 'Player']])

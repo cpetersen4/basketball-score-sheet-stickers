@@ -4,10 +4,6 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from pypdf import PdfReader
-from pypdf.generic import ContentStream
-from reportlab.pdfgen import canvas
-
 from test_generate_pdf import PDF
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +13,43 @@ from sticker_app import StickerApp
 
 
 class WizardTests(unittest.TestCase):
+    def test_small_window_keeps_navigation_visible_and_last_row_reachable(self):
+        app = StickerApp(read_roster, manual_roster, generate_pdf)
+        try:
+            self.assertLessEqual(app.window.minsize()[1], 650)
+            app.window.geometry('1000x480')
+            app.show(2)
+            app.window.update()
+            def descendants(widget):
+                for child in widget.winfo_children():
+                    yield child
+                    yield from descendants(child)
+            button = next(widget for widget in descendants(app.window)
+                          if widget.winfo_class() == 'Button' and widget.cget('text') == 'Continue to save  >')
+            self.assertTrue(button.winfo_ismapped())
+            self.assertLessEqual(button.winfo_rooty() + button.winfo_height(),
+                                 app.window.winfo_rooty() + app.window.winfo_height())
+            final_entry = next(widget for widget in descendants(app.window)
+                               if widget.winfo_class() == 'TEntry'
+                               and widget.cget('textvariable') == str(app.players[14][1]))
+            self.assertEqual(app.body_scrollbar.winfo_manager(), 'pack')
+            app.body_canvas.yview_moveto(1)
+            app.window.update()
+            self.assertGreaterEqual(final_entry.winfo_rooty(), app.body_canvas.winfo_rooty())
+            self.assertLessEqual(final_entry.winfo_rooty() + final_entry.winfo_height(),
+                                 app.body_canvas.winfo_rooty() + app.body_canvas.winfo_height())
+            app.body_canvas.yview_moveto(0)
+            final_entry.focus_force()
+            app.window.update()
+            self.assertLessEqual(final_entry.winfo_rooty() + final_entry.winfo_height(),
+                                 app.body_canvas.winfo_rooty() + app.body_canvas.winfo_height())
+            app.players[14][1].set('Last Player')
+            app.navigate(1)
+            app.navigate(2)
+            self.assertEqual(app.players[14][1].get(), 'Last Player')
+        finally:
+            app.window.destroy()
+
     def test_manual_workflow_and_back_navigation_preserve_roster(self):
         app = StickerApp(read_roster, manual_roster, generate_pdf)
         app.window.update_idletasks()
