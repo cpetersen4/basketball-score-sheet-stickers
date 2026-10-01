@@ -8,7 +8,16 @@ The current artwork uses **Sample Team** and obvious placeholders for player and
 
 Download the [Windows package from Releases](https://github.com/cpetersen4/basketball-score-sheet-stickers/releases/latest), extract the ZIP, and run `Basketball-Score-Sheet-Stickers.exe`. It includes the standalone app, fictional sample roster, and [illustrated PDF manual](docs/Basketball-Score-Sheet-Stickers-Manual.pdf).
 
-No Python or Illustrator installation is required. The EXE bundles its libraries and PDF template, works offline, and uses Windows Arial. A PDF viewer is needed to view or print the result. Designed for Windows 10/11 x64; tested on Windows 11. The executable is unsigned.
+No Python or Illustrator installation is required. The EXE bundles its libraries and PDF template, works offline, and uses Windows Arial. The executable is unsigned.
+
+### System requirements
+
+- **Windows only:** Windows 10 or 11, 64-bit (x64). Tested on Windows 11.
+- A PDF viewer to view or print the generated stickers.
+- A printer and full-sheet label paper for printing.
+- No Python, Adobe Illustrator, or internet connection is required to run the app.
+
+Support for additional operating systems could be added on request. Submit an [issue](https://github.com/cpetersen4/basketball-score-sheet-stickers/issues) to request support.
 
 ### Load a CSV or enter a roster manually
 
