@@ -8,7 +8,16 @@ The current artwork uses **Sample Team** and obvious placeholders for player and
 
 Download the [Windows package from Releases](https://github.com/cpetersen4/basketball-score-sheet-stickers/releases/latest), extract the ZIP, and run `Basketball-Score-Sheet-Stickers.exe`. It includes the standalone app, fictional sample roster, and [illustrated PDF manual](docs/Basketball-Score-Sheet-Stickers-Manual.pdf).
 
-No Python or Illustrator installation is required. The EXE bundles its libraries and PDF template, works offline, and uses Windows Arial. A PDF viewer is needed to view or print the result. Designed for Windows 10/11 x64; tested on Windows 11. The executable is unsigned.
+No Python or Illustrator installation is required. The EXE bundles its libraries and PDF template, works offline, and uses Windows Arial. The executable is unsigned.
+
+### System requirements
+
+- **Windows only:** Windows 10 or 11, 64-bit (x64). Tested on Windows 11.
+- A PDF viewer to view or print the generated stickers.
+- A printer and full-sheet label paper for printing.
+- No Python, Adobe Illustrator, or internet connection is required to run the app.
+
+Support for additional operating systems could be added on request. Submit an [issue](https://github.com/cpetersen4/basketball-score-sheet-stickers/issues) to request support.
 
 ### Load a CSV or enter a roster manually
 
@@ -31,11 +40,11 @@ No Python or Illustrator installation is required. The EXE bundles its libraries
 
 ## Printing and use
 
-1. Open the sticker PDF in a PDF viewer.
-2. Select the home or away sticker page as needed.
-3. Print at **100% / actual size**, with automatic page scaling disabled so the roster layout keeps its intended dimensions.
-4. Check a plain-paper test print against the score sheet before printing on adhesive paper.
-5. Cut out the roster stickers and attach them to the appropriate team roster area on the score sheet.
+1. Use **full-sheet 8.5 × 11-inch adhesive label paper**, such as [this label paper](https://a.co/d/0fz6G47o) or Staples full-sheet shipping label paper. Choose paper suitable for your printer, with one label covering the whole sheet.
+2. Open the generated PDF and select the home or away page as needed.
+3. Select **Letter (8.5 × 11 inches)** paper and **Actual size / 100%** in the print dialog. Do **not** select Fit, Shrink, or Scale to fit. The PDF pages are landscape.
+4. Check a plain-paper test print against the score sheet, then print on the label paper.
+5. Use a **straight paper cutter or scissors** to cut out the individual stickers. Peel off the backing and attach each sticker to the team roster area on the score sheet.
 
 ## Updating the artwork
 
