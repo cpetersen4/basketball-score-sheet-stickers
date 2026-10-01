@@ -3,7 +3,8 @@
 !/teams/README.md
 !/teams/sample/
 /teams/sample/*.pdf
-private-team/
+# Legacy team folders stored at the repository root
+/*-*/
 __pycache__/
 /build/
 /dist/
