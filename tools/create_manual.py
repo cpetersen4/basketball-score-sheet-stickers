@@ -77,7 +77,7 @@ for heading, lines in [
     ('Roster rules', ['Use the header above. Supported roles: Player, Head Coach, Assistant Coach.', 'Use 1-15 players and at most one head coach. Player order is preserved.', 'Quote names containing commas. Save as UTF-8 for accented names.']),
     ('If the app rejects a roster', ['Check missing names, duplicate numbers, extra CSV columns, and role spelling.', 'Shorten names that cannot fit legibly. Remove unsupported characters.', 'Choose a new filename if the output PDF already exists.']),
     ('Printing and opening PDFs', ['Use actual size, not Fit to page. Confirm alignment with a plain-paper test.', 'If Open saved PDF fails, open the PDF directly in your preferred viewer.']),
-    ('Compatibility and local files', ['Designed for Windows 10/11, 64-bit. Tested on Windows 11.', 'The app runs locally and makes no network requests. A PDF viewer is needed', 'to view or print the result. The executable is not digitally signed.', 'Changes remain in memory until you close the app; PDFs are saved to disk.', 'Free personal use. Redistributing or reselling the app requires written permission.'])]:
+    ('Compatibility and local files', ['Designed for Windows 10/11, 64-bit. Tested on Windows 11.', 'The app runs locally and makes no network requests. A PDF viewer is needed', 'to view or print the result.', 'Changes remain in memory until you close the app; PDFs are saved to disk.', 'Free personal use. Redistributing or reselling the app requires written permission.'])]:
     text(40,y,heading,14,True); y-=26
     for line in lines:
         text(40,y,line,10); y-=18

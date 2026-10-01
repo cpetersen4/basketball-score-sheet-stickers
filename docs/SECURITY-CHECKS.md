@@ -11,7 +11,7 @@ Checks run on Windows 11 on 2026-09-30 for version 1.0.0:
 - EXE resources: basketball icon present. ZIP contents: EXE, fictional CSV, PDF manual, personal-use license, and third-party notices; no text quick-start.
 - Four-page manual rendered and visually checked. README app screenshots and generated-sheet preview use fictional names. Private team folders are excluded by Git.
 
-These checks describe this build and do not guarantee absence of all vulnerabilities. The executable is unsigned. Windows 10 is a compatibility target; the package was tested on Windows 11.
+These checks describe this build and do not guarantee absence of all vulnerabilities. Windows 10 is a compatibility target; the package was tested on Windows 11.
 
 The GitHub Windows workflow repeats tests, medium/high Bandit checks, dependency auditing, and portable build verification for PRs and pushes to main. It does not replace the local Defender or Gitleaks checks.
 
