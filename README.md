@@ -12,7 +12,7 @@ No Python or Illustrator installation is required. The EXE bundles its libraries
 
 ### Load a CSV or enter a roster manually
 
-![Load roster screen](docs/screenshots/load-roster.jpg)
+![Load roster screen](docs/screenshots/load-roster.png)
 
 ### Review up to 15 players and coaching staff
 
