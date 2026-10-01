@@ -88,15 +88,14 @@ class StickerApp:
         sidebar.pack_propagate(False)
         self.label(sidebar, 'BASKETBALL', size=17, color=TEAL, bold=True).pack(anchor='w', padx=22, pady=(30, 0))
         self.label(sidebar, 'SCORE SHEET STICKERS', size=9, color=MUTED, bold=True).pack(anchor='w', padx=22)
-        self.label(sidebar, 'A roster. A sheet.\nReady for game day.', color=MUTED, justify='left').pack(
-            anchor='w', padx=22, pady=(15, 35))
+        tk.Frame(sidebar, bg=sidebar['bg'], height=30).pack(fill='x')
         titles = ['Load roster', 'Review team', 'Save PDF']
         for index, title in enumerate(titles, 1):
             frame = tk.Frame(sidebar, bg=PALE if index == step else sidebar['bg'])
             frame.pack(fill='x', padx=12, pady=5)
             self.label(frame, f'{index}   {title}', color=TEAL if index == step else MUTED,
                        bold=index == step).pack(anchor='w', padx=14, pady=13)
-        self.label(sidebar, 'OFFLINE & LOCAL\nYour roster stays on this PC.', size=9, color=MUTED,
+        self.label(sidebar, 'No internet connection required.', size=9, color=MUTED, wraplength=150,
                    justify='left').pack(side='bottom', anchor='w', padx=20, pady=25)
         main = tk.Frame(self.window, bg=BG)
         main.pack(side='left', fill='both', expand=True, padx=28, pady=22)
@@ -109,7 +108,7 @@ class StickerApp:
                       activeforeground=TEAL, relief='flat', bd=0, cursor='hand2',
                       font=('Segoe UI', 10, 'bold' if index == step else 'normal'),
                       padx=14, pady=7).pack(side='left', expand=True)
-        headings = ['Start with your roster', 'Check your team', 'Save your sticker sheets']
+        headings = ['Load roster', 'Review team', 'Save PDF']
         descriptions = ['Import a CSV, or start with a blank roster and enter your team manually.',
                         'Edit player names, jersey numbers and coaches before printing.',
                         'Create a print-ready PDF with six home and six away roster stickers.']
@@ -177,9 +176,9 @@ class StickerApp:
 
     def load_screen(self, body):
         for title, caption, button, action, primary in [
-            ('Import your roster', 'Use a CSV or TXT with number, name and role columns.\nYou can edit everything on the next screen.',
+            ('Import CSV', 'Use a CSV or TXT with number, name and role columns.\nReview and edit the imported roster on the next screen.',
              'Choose CSV / TXT', self.import_csv, True),
-            ('No CSV? No problem.', 'Start with a blank roster and enter players and coaches yourself.',
+            ('Enter manually', 'Enter player names, jersey numbers and coaches without a CSV.',
              'Skip CSV / Enter manually', lambda: self.show(2), False)]:
             card = self.card(body, padx=25, pady=25)
             card.pack(fill='x', pady=(0, 18))
@@ -339,7 +338,7 @@ class StickerApp:
             messagebox.showerror('Could not create PDF', str(error), parent=self.window)
             return
         self.saved_path = Path(result).resolve()
-        self.status.configure(text=f'Your PDF is ready.\n{self.saved_path}')
+        self.status.configure(text=f'PDF saved:\n{self.saved_path}')
         self.open_button.pack(anchor='w', pady=(12, 0))
 
     def open_pdf(self):
