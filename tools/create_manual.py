@@ -29,7 +29,7 @@ def page(number, title, subtitle):
     c.setStrokeColor(HexColor('#E2E8F0'))
     c.line(40, 44, 572, 44)
     text(40, 28, 'Basketball Score Sheet Stickers', 9)
-    text(548, 28, f'{number} / 4', 9)
+    text(548, 28, f'{number} / 5', 9)
 
 def screenshot(name):
     reader = ImageReader(str(ROOT / 'docs/screenshots' / name))
@@ -82,5 +82,24 @@ for heading, lines in [
     for line in lines:
         text(40,y,line,10); y-=18
     y-=20
+c.showPage()
+page(5, 'Cricut Print Then Cut', 'Export individual stickers for printing and cutting through Design Space.')
+y = 620
+for line in [
+    'On the Save PDF screen, choose Export Cricut ZIP. No ordinary PDF is required.',
+    'Extract the ZIP. It contains home and away images and a PDF instruction sheet.',
+    'Upload a PNG as a flat, full-color Print Then Cut image in Design Space.',
+    'Keep the white background inside the sticker. Do not isolate its letters or lines.',
+    'Set the image width given in Cricut-Instructions.pdf with proportions locked.',
+    'Duplicate the image for the number of stickers you need.',
+    'Print through Design Space so it adds the sensor alignment marks.',
+    'Use Letter label paper and do not fit, shrink, or scale the printed page.',
+    'Design Space may arrange your stickers across more than one sheet.',
+    'Use a Print Then Cut-compatible Cricut and calibrate it before testing.',
+    'Only the outside rectangle should be cut. Test one sticker before a full sheet.',
+    'For a kiss cut, use a setting that cuts the label but leaves the backing intact.',
+    'Check physical sizing, alignment, and cutting pressure on your own machine.',
+]:
+    text(40, y, line, 10); y -= 27
 c.save()
 print(OUTPUT)

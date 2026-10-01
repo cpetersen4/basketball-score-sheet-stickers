@@ -8,11 +8,37 @@ from test_generate_pdf import PDF
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'app'))
-from generate_pdf import read_roster, manual_roster, generate_pdf
+from generate_pdf import read_roster, manual_roster, generate_pdf, generate_cricut
+from unittest.mock import patch
 from sticker_app import StickerApp
 
 
 class WizardTests(unittest.TestCase):
+    def test_cricut_export_without_pdf_preserves_roster_and_export_status(self):
+        app = StickerApp(read_roster, manual_roster, generate_pdf, generate_cricut)
+        try:
+            app.window.update()
+            app.window.withdraw()
+            app.team.set('Cricut Team')
+            app.players[0][0].set('00')
+            app.players[0][1].set('Fresh Name')
+            app.navigate(3)
+            with tempfile.TemporaryDirectory() as folder:
+                output = Path(folder) / 'team.zip'
+                with patch('sticker_app.filedialog.asksaveasfilename', return_value=str(output)):
+                    app.export_cricut()
+                self.assertTrue(output.is_file())
+                self.assertIsNone(app.saved_path)
+                app.navigate(1)
+                app.navigate(3)
+                self.assertIn(str(output.resolve()), app.cricut_status.cget('text'))
+                self.assertEqual(app.players[0][1].get(), 'Fresh Name')
+                with patch('sticker_app.filedialog.asksaveasfilename', return_value=''):
+                    app.export_cricut()
+                self.assertEqual(app.cricut_saved_path, output.resolve())
+        finally:
+            app.window.destroy()
+
     def test_small_window_keeps_navigation_visible_and_last_row_reachable(self):
         app = StickerApp(read_roster, manual_roster, generate_pdf)
         try:

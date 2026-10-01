@@ -20,3 +20,10 @@ The AGPL PDF engine was replaced with permissive pypdf, pdfminer.six, and Report
 ## Follow-up bug sweep (2026-09-30)
 
 The follow-up fixes duplicate CSV headers, invisible text sizing, malformed/repeated template rows, template text retained in nested PDF forms, incomplete output files after failed writes, and access to all rows on smaller screens. Seventeen regression/integration tests pass, including exclusive-file-creation race protection and scroll/keyboard navigation. The Windows package was rebuilt and verified independently of external Python. Dependency auditing remains clear; Bandit has no medium/high findings.
+
+## Cricut export verification (2026-10-01)
+
+- All 21 unit/integration tests passed, including 600-DPI export, rectangular cut boundaries, overwrite protection, failed-write cleanup, and navigation state.
+- The extracted Windows package generated PDF and Cricut outputs with no external Python on PATH. A fresh fictional 15-player roster, including accents and different jersey number lengths, was exported by the EXE; both 1808 x 1856 images were visually checked.
+- Bandit: no medium/high findings. Dependency audit: no known vulnerabilities. Staged Gitleaks scan: no secrets. Defender completed a custom release-directory scan without detections associated with this directory.
+- The PDF manual includes Cricut instructions. Design Space import, machine calibration, and physical printing/cutting still need testing on a compatible Cricut.

@@ -58,6 +58,16 @@ Click the steps at the top or use **Back** to review your entries. Choose a new 
 
 > **Print setting:** Use **Actual size / 100%**. Do **not** use Fit, Shrink, or Scale to fit.
 
+## ✂️ Optional: Cricut cutting
+
+On the **Save PDF** screen, choose **Export Cricut ZIP...**. You do not need to create the ordinary PDF first.
+
+The PNG images are exported at **600 DPI** for sharp printing at the supplied sticker size.
+
+Extract the ZIP and upload the home or away PNG image to Cricut Design Space as **Print Then Cut**. Keep the white sticker background, set the image size given in **Cricut-Instructions.pdf**, then duplicate it for as many stickers as you need. Print through Design Space so it adds the alignment marks, then cut with your compatible Cricut machine.
+
+Only the outside rectangle should be cut. Do not remove the white background or select individual letters. Design Space may spread the copies across multiple sheets. Test one sticker first to confirm its size, alignment, and cutting pressure.
+
 ## 📋 Optional: import a team list
 
 The download includes **team-names_sample.csv** as an example. Use a copy for your own team, or enter the names directly in the app. The [CSV format instructions](DEVELOPMENT.md#csv-format) explain the required columns if you want to prepare a file.
