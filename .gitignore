@@ -3,7 +3,8 @@
 !/teams/README.md
 !/teams/sample/
 /teams/sample/*.pdf
-park15g-gravelle/
+# Legacy team folders stored at the repository root
+/*-*/
 __pycache__/
 /build/
 /dist/

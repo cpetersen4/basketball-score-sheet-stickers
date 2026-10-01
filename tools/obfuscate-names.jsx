@@ -4,8 +4,7 @@
 (function () {
     var root = new File($.fileName).parent.parent;
     var target = new File(root.fsName + '/templates/score-sheet-stickers-2026.ai');
-    var roster = new File(root.fsName + '/teams/park15g-gravelle/team-names_park15g-gravelle.txt');
-    if (!roster.exists) roster = File.openDialog('Select the original roster CSV or TXT');
+    var roster = File.openDialog('Select the original roster CSV or TXT');
     if (!roster) throw new Error('No roster selected. Nothing changed.');
     roster.encoding = 'UTF-8';
     if (!roster.open('r')) throw new Error('Cannot read roster.');
