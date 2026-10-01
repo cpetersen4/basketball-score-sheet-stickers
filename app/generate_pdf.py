@@ -14,7 +14,7 @@ from io import BytesIO
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTChar
 from pypdf import PdfReader, PdfWriter
-from pypdf.generic import ContentStream, NameObject
+from pypdf.generic import ContentStream, NameObject, DictionaryObject, DecodedStreamObject
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -29,8 +29,8 @@ def read_roster(path):
     numbers = set()
     with Path(path).open(encoding='utf-8-sig', newline='') as stream:
         reader = csv.DictReader(stream)
-        if not reader.fieldnames or set(reader.fieldnames) != {'number', 'name', 'role'}:
-            raise ValueError('CSV header must contain number,name,role (in any order).')
+        if not reader.fieldnames or len(reader.fieldnames) != 3 or set(reader.fieldnames) != {'number', 'name', 'role'}:
+            raise ValueError('CSV header must contain number,name,role exactly once (in any order).')
         for row in reader:
             if None in row or any(value is None for value in row.values()):
                 raise ValueError(f'CSV row {reader.line_num} has missing or extra columns.')
@@ -117,6 +117,16 @@ def _plan(page, roster, team):
     slots = [s for s in spans if re.fullmatch(r'Player \d{2}', s['text'].strip())]
     if len(slots) != 6 * CAPACITY:
         raise ValueError(f'Template must have six stickers per page, each with Player 01-{CAPACITY}.')
+    anchors = [s for s in slots if s['text'] == 'Player 01']
+    expected = {f'Player {index:02d}' for index in range(1, CAPACITY + 1)}
+    if len(anchors) != 6:
+        raise ValueError('Each sticker must contain Player 01-15 exactly once.')
+    for anchor in anchors:
+        rows = [slot for slot in slots
+                if abs(slot['origin'][0] - anchor['origin'][0]) < 0.2
+                and 0 <= slot['origin'][1] - anchor['origin'][1] <= 190]
+        if len(rows) != CAPACITY or {slot['text'] for slot in rows} != expected:
+            raise ValueError('Each sticker must contain Player 01-15 exactly once.')
     for slot in slots:
         index = int(slot['text'].strip()[-2:]) - 1
         if not 0 <= index < CAPACITY:
@@ -167,6 +177,46 @@ def manual_roster(rows, head_coach, assistants):
     return {'players': players, 'head_coach': coaches[0], 'assistants': coaches[1:]}
 
 
+def _remove_template_text(page, reader):
+    """Remove text from page streams and nested reusable PDF form objects."""
+    forms, active = {}, set()
+    def clean_stream(stream):
+        content = ContentStream(stream, reader)
+        content.operations = [(args, op) for args, op in content.operations
+                              if op not in (b'Tj', b'TJ', b"'", b'"')]
+        return content.get_data()
+    def clean_resources(resources):
+        cleaned = DictionaryObject(resources.get_object())
+        if '/XObject' in cleaned:
+            objects = DictionaryObject(cleaned['/XObject'].get_object())
+            for name, reference in objects.items():
+                obj = reference.get_object()
+                if obj.get('/Subtype') != '/Form':
+                    continue
+                key = id(obj)
+                if key in active:
+                    raise ValueError('Template contains cyclic PDF form objects.')
+                if key not in forms:
+                    active.add(key)
+                    form = DecodedStreamObject()
+                    form.update({k: v for k, v in obj.items()
+                                 if k not in ('/Length', '/Filter', '/DecodeParms', '/Metadata')})
+                    form.set_data(clean_stream(obj))
+                    if '/Resources' in form:
+                        form[NameObject('/Resources')] = clean_resources(form['/Resources'])
+                    forms[key] = form
+                    active.remove(key)
+                objects[name] = forms[key]
+            cleaned[NameObject('/XObject')] = objects
+        return cleaned
+    stream = DecodedStreamObject()
+    stream.set_data(clean_stream(page.get_contents()))
+    page[NameObject('/Contents')] = stream
+    if '/Resources' in page:
+        page[NameObject('/Resources')] = clean_resources(page['/Resources'])
+    page.pop('/Metadata', None)
+
+
 def generate_pdf(csv_path, output_path, team_name, template_path=DEFAULT_TEMPLATE, *, roster=None):
     output, template = Path(output_path), Path(template_path)
     if output.resolve() == template.resolve() or (csv_path and output.resolve() == Path(csv_path).resolve()):
@@ -197,17 +247,15 @@ def generate_pdf(csv_path, output_path, team_name, template_path=DEFAULT_TEMPLAT
         for span, value, width, centered in plans:
             if any(ord(c) not in font.face.charToGlyph for c in value):
                 raise ValueError('A roster or team name contains a character Arial cannot print.')
+            if value and pdfmetrics.stringWidth(value, 'RosterArial', 1) <= 0:
+                raise ValueError('Names must contain visible printable text.')
             if value and pdfmetrics.stringWidth(value, 'RosterArial', 5.5) > width:
                 raise ValueError(f'Text is too long to print legibly: {value!r}. Shorten it.')
     writer = PdfWriter()
     for source, page, plans in zip(reader.pages, pages, page_plans):
         # Strip every text-showing operation before cloning the page. This
         # physically removes placeholders; graphics and table paths stay intact.
-        stream = ContentStream(source.get_contents(), reader)
-        stream.operations = [(args, op) for args, op in stream.operations
-                             if op not in (b'Tj', b'TJ', b"'", b'"')]
-        source[NameObject('/Contents')] = stream
-        source.pop('/Metadata', None)
+        _remove_template_text(source, reader)
         overlay = BytesIO()
         drawing = canvas.Canvas(overlay, pagesize=(page['width'], page['height']))
         removed = set().union(*(span['ids'] for span, *_ in plans))
@@ -241,9 +289,24 @@ def generate_pdf(csv_path, output_path, team_name, template_path=DEFAULT_TEMPLAT
         target.compress_content_streams()
     writer.add_metadata({'/Title': team + ' - Basketball Score Sheet Stickers',
                          '/Creator': 'Basketball Score Sheet Stickers'})
+    buffer = BytesIO()
+    writer.write(buffer)
+    payload = buffer.getvalue()
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open('xb') as destination:
-        writer.write(destination)
+    # Open outside the cleanup handler: an existing file must never be deleted
+    # if another process creates it between validation and exclusive creation.
+    destination = output.open('xb')
+    try:
+        with destination:
+            if destination.write(payload) != len(payload):
+                raise OSError('The PDF could not be written completely.')
+    except BaseException as error:
+        try:
+            output.unlink()
+        except OSError:
+            raise OSError(f'PDF write failed and the partial file could not be removed: {output}. '
+                          'Remove it before retrying.') from error
+        raise
     return output
 
 
