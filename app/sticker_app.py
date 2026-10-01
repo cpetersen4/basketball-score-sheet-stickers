@@ -16,10 +16,12 @@ LINE = '#E2E8F0'
 
 
 class StickerApp:
-    def __init__(self, read_roster, manual_roster, generate_pdf):
+    def __init__(self, read_roster, manual_roster, generate_pdf, generate_cricut=None):
         self.read_roster = read_roster
         self.manual_roster = manual_roster
         self.generate_pdf = generate_pdf
+        self.generate_cricut = generate_cricut
+        self.cricut_saved_path = None
         self.window = tk.Tk()
         self.window.title('Basketball Score Sheet Stickers')
         asset_root = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[1]))
@@ -316,6 +318,34 @@ class StickerApp:
         self.label(hint, 'Print at actual size', color=TEAL, size=12, bold=True).pack(anchor='w')
         self.label(hint, 'Choose 100% / actual size in your PDF viewer. Test on plain paper first.',
                    color=INK, wraplength=650, justify='left').pack(anchor='w', pady=(6, 0))
+        if self.generate_cricut is not None:
+            cricut = self.card(body, padx=20, pady=18)
+            cricut.pack(fill='x')
+            self.label(cricut, 'Cricut Print Then Cut', size=12, bold=True).pack(anchor='w')
+            self.label(cricut, 'Export individual home and away sticker images for Design Space.\n'
+                       'The ZIP includes a PDF with sizing, printing, and cutting instructions.',
+                       color=MUTED, wraplength=650, justify='left').pack(anchor='w', pady=(6, 12))
+            self.button(cricut, 'Export Cricut ZIP...', self.export_cricut).pack(anchor='w')
+            self.cricut_status = self.label(cricut, '', color=TEAL, wraplength=650, justify='left')
+            self.cricut_status.pack(anchor='w', pady=(10, 0))
+            if self.cricut_saved_path:
+                self.cricut_status.configure(text=f'Cricut ZIP saved:\n{self.cricut_saved_path}')
+
+    def export_cricut(self):
+        try:
+            roster = self.collect_roster()
+            name = re.sub(r'[^\w-]+', '-', self.team.get().strip()).strip('-') or 'team'
+            path = filedialog.asksaveasfilename(parent=self.window, title='Export Cricut stickers',
+                                               initialfile=name + '-cricut.zip', defaultextension='.zip',
+                                               initialdir=str(Path(self.source).resolve().parent) if self.source else None,
+                                               filetypes=[('ZIP', '*.zip')], confirmoverwrite=False)
+            if not path:
+                return
+            result = self.generate_cricut(self.source, path, self.team.get(), roster=roster)
+            self.cricut_saved_path = Path(result).resolve()
+            self.cricut_status.configure(text=f'Cricut ZIP saved:\n{self.cricut_saved_path}')
+        except Exception as error:
+            messagebox.showerror('Could not export Cricut stickers', str(error), parent=self.window)
 
     def choose_output(self):
         name = re.sub(r'[^\w-]+', '-', self.team.get().strip()).strip('-') or 'team'

@@ -312,7 +312,12 @@ def generate_pdf(csv_path, output_path, team_name, template_path=DEFAULT_TEMPLAT
 
 def gui():
     from sticker_app import StickerApp
-    StickerApp(read_roster, manual_roster, generate_pdf).run()
+    StickerApp(read_roster, manual_roster, generate_pdf, generate_cricut).run()
+
+
+def generate_cricut(csv_path, output_path, team_name, template_path=DEFAULT_TEMPLATE, *, roster=None):
+    from cricut_export import export_cricut
+    return export_cricut(generate_pdf, csv_path, output_path, team_name, template_path, roster=roster)
 
 
 def main():
@@ -324,9 +329,11 @@ def main():
     parser.add_argument('output', type=Path, help='New printable PDF filename')
     parser.add_argument('--team', required=True, help='Team name for home and away stickers')
     parser.add_argument('--template', type=Path, default=DEFAULT_TEMPLATE)
+    parser.add_argument('--cricut', action='store_true', help='Export a Cricut Print Then Cut ZIP instead of a PDF')
     args = parser.parse_args()
     try:
-        generate_pdf(args.csv, args.output, args.team, args.template)
+        exporter = generate_cricut if args.cricut else generate_pdf
+        exporter(args.csv, args.output, args.team, args.template)
     except Exception as error:
         parser.exit(1, f'Error: {error}\n')
     print(f'Created {args.output}')
