@@ -1,2 +1,4 @@
 *.ai binary
 *.pdf binary
+
+licenses/** whitespace=-blank-at-eol,-blank-at-eof
