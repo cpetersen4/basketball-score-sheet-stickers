@@ -1,2 +1,11 @@
-# Keep the real team roster and artwork local.
+# Private team rosters and generated PDFs
+/teams/*
+!/teams/README.md
+!/teams/sample/
+/teams/sample/*.pdf
 private-team/
+__pycache__/
+/build/
+/dist/
+/output/
+*.spec
