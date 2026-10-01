@@ -59,7 +59,7 @@ Extract `Basketball-Score-Sheet-Stickers-Windows-x64.zip` and double-click `Bask
 2. **Review team:** enter or edit the team name, jersey numbers, player names and coaches. Enter assistant coaches one per line. The team summary updates as you type.
 3. **Save PDF:** choose a new output filename, create the printable PDF, then use **Open saved PDF** to print it.
 
-Click any step at the top, or use **Back**, to switch screens; entered values and the output path are preserved. **Save PDF** validates the roster before opening. Both imported and manually entered rosters receive the same validation.
+Click any step at the top, or use **Back**, to switch screens; entered values and the output path are preserved. **Save PDF** validates the roster before opening. Both imported and manually entered rosters receive the same validation. On smaller screens, scroll the form to reach all 15 rows; tabbing to a field brings it into view. Navigation buttons remain visible.
 
 The standalone app targets 64-bit Windows 10/11. It bundles Python, its PDF dependency, and the template. It uses the standard Windows Arial font and works offline; Illustrator is not needed.
 

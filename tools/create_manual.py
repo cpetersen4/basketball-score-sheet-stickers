@@ -49,6 +49,7 @@ c.showPage()
 page(2, '2. Review your team', 'Enter the team name and check every player, number, and coach.')
 y = screenshot('review-team.jpg')
 for line in ['Use up to 15 player rows. Leave unused rows completely blank.',
+             'On smaller screens, scroll the form; tabbing brings fields into view.',
              'Jersey numbers must be unique and contain 1-3 digits (0-999).',
              'Head coach is optional. Enter assistant coaches one per line.',
              'Click the top steps or Back to navigate. Edits stay in this open session.',
